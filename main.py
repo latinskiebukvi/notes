@@ -18,14 +18,6 @@ from schemas import schemas
 app = FastAPI()
 
 
-def differ(ex1, ex2):
-    attrs = dir(ex1)
-    for attr in attrs:
-        val2 = getattr(ex2, attr)
-        setattr(ex1, attr, val2)
-    return ex1, ex2
-
-
 @app.get("/")
 async def get_notes(
     session: AsyncSession=Depends(get_session),
@@ -35,7 +27,7 @@ async def get_notes(
     return result
 
 
-@app.post("/notes")
+@app.post("/")
 async def add_notes(
     item: schemas.NotesList,
     session: AsyncSession=Depends(get_session)
