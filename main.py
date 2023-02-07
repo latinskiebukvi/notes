@@ -1,6 +1,8 @@
 from typing import List
 
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
 from sqlalchemy.ext.asyncio import AsyncSession
 import uvicorn
 
@@ -16,6 +18,13 @@ from schemas import schemas
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 @app.get("/")
@@ -24,7 +33,7 @@ async def get_notes(
     response_model=schemas.Note
 ):
     result = await async_execution(session=session, stmt=Note, filter=Note.id.isnot(None))
-    return result
+    return {"notes": result}
 
 
 @app.post("/")

@@ -3,3 +3,4 @@
 !schemas/
 alembic.ini
 manage.py
+*.bat
