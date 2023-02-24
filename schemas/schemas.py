@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Base(BaseModel):
-    token: str = "qwe123"
+    token: Optional[str]
 
 
 class Note(BaseModel):

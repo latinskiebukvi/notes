@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,12 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import uvicorn
 
 from db.models import Note
-from db.settings import (
-    get_session,
-    async_execution,
-    async_addition,
-    async_update
-)
+from db.settings import get_session
+from db.crud import async_execution, async_addition, async_update
 
 from schemas import schemas
 
@@ -23,24 +17,23 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 
-@app.get("/")
-async def get_notes(
-    session: AsyncSession=Depends(get_session),
-    response_model=schemas.Note
-):
-    result = await async_execution(session=session, stmt=Note, filter=Note.id.isnot(None))
-    return {"notes": result}
+@app.get("/", response_model=schemas.NotesList)
+async def get_notes(session: AsyncSession = Depends(get_session)):
+    token = None
+    result = await async_execution(
+        session=session, stmt=Note, filter=Note.id.isnot(None)
+    )
+    return {"token": token, "notes": result}
 
 
 @app.post("/")
 async def add_notes(
-    item: schemas.NotesList,
-    session: AsyncSession=Depends(get_session)
-):  
+    item: schemas.NotesList, session: AsyncSession = Depends(get_session)
+):
     to_add = []
     to_update = []
 
@@ -56,11 +49,6 @@ async def add_notes(
 
 
 if __name__ == "__main__":
-    config = uvicorn.Config(
-        "main:app",
-        port=5000,
-        log_level="info",
-        reload=True
-    )
+    config = uvicorn.Config("main:app", port=5000, log_level="info", reload=True)
     server = uvicorn.Server(config)
     server.run()
